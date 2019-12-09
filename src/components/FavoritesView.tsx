@@ -52,7 +52,7 @@ function SearchButton(props: { onPress: () => void }) {
     return (
         <ThemeContext.Consumer>
             {theme => (
-                <View style={{...styles.searchButton, backgroundColor: theme.primary.dark}}>
+                <View style={{...styles.searchButton, backgroundColor: theme.secondary.default}}>
                     <TouchableOpacity onPress={props.onPress}>
                         <Icon
                             name="search"

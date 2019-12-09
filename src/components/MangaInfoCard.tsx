@@ -61,7 +61,7 @@ function FavoriteButton(props: FavoriteButtonProps) {
                         name={name}
                         style={{
                             ...styles.favoriteButton,
-                            color: theme.primary.dark,
+                            color: theme.secondary.default,
                             ...props.style
                         }}
                     />

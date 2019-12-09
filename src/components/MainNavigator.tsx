@@ -1,5 +1,5 @@
 import { createStackNavigator } from "react-navigation-stack"
-import { BackHandler, View, TouchableOpacity } from "react-native"
+import { BackHandler, TouchableOpacity } from "react-native"
 import React, { useEffect } from "react"
 
 import SearchView from "./SearchView"
@@ -87,9 +87,9 @@ const MainNavigator = createStackNavigator({
     ReadView: { screen: ReadViewScreen }
 }, {
     defaultNavigationOptions: (props: any) => ({
-        headerTintColor: Default.primary.text.dark,
+        headerTintColor: Default.primary.text.default,
         headerStyle: {
-            backgroundColor: Default.primary.dark
+            backgroundColor: Default.primary.default
         },
         headerRight: () => (
             <TouchableOpacity onPress={() => props.navigation.push("SettingsView")}>

@@ -19,6 +19,7 @@ import MainNavigator from 'src/components/MainNavigator'
 import { ThemeContext, Default } from 'src/Theme'
 import { PersistGate } from 'redux-persist/integration/react'
 import mainReducer from 'src/state/reducers'
+import { StatusBar } from 'react-native'
 
 const store = createStore(mainReducer)
 const persistor = persistStore(store)
@@ -30,6 +31,7 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
       <ThemeContext.Provider value={Default}>
+        <StatusBar backgroundColor={Default.primary.light} barStyle="light-content"/>
         <AppContainer />
       </ThemeContext.Provider>
       </PersistGate>

@@ -34,14 +34,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     chapterEntry: {
-        justifyContent: "center",
-        alignItems: "center",
         height: 40,
         margin: 10,
         flex: 1
     },
     chapterEntryText: {
         textAlign: "center",
+        textAlignVertical: "center",
+        width: "100%",
+        height: "100%"
     }
 })
 
@@ -105,12 +106,12 @@ function MangaInfoView(props: MangaInfoViewProps) {
                                         renderItem={({ item }) => (
                                             <View style={{
                                                 ...styles.chapterEntry,
-                                                backgroundColor: theme.secondary.dark
+                                                backgroundColor: theme.secondary.default
                                             }}>
                                                 <TouchableOpacity onPress={() => onLoadMange(item, 0)}>
                                                     <Text style={{
                                                         ...styles.chapterEntryText,
-                                                        color: theme.secondary.text.dark
+                                                        color: theme.secondary.text.default
                                                     }}>{item.title}</Text>
                                                 </TouchableOpacity>
                                             </View>

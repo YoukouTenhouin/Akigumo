@@ -1,16 +1,21 @@
 import React, { useEffect } from 'react'
-import { StyleSheet, View, TouchableOpacity, Text, StatusBar, Dimensions } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Text, Dimensions, StatusBar } from 'react-native'
 import { connect, ConnectedProps } from 'react-redux'
 import ViewPager from '@react-native-community/viewpager'
 import Slider from '@react-native-community/slider'
 import moment from 'moment'
+import FastImage from 'react-native-fast-image'
+import * as Progress from 'react-native-progress'
+import Image from 'react-native-image-progress'
+import { createImageProgress } from 'react-native-image-progress'
 
 import { MainStates } from 'src/state/types'
 import { ChapterMeta, ChapterInfo, PageInfo, ChapterFeeder } from 'src/MangaAPI'
 import { Actions } from 'src/state/actions'
-import FastImage from 'react-native-fast-image'
 import FullScreen from 'src/FullScreen'
 import BatteryStatus from 'src/BatteryStatus'
+
+const ProgressImage = createImageProgress(FastImage)
 
 interface TouchResponderProps {
     overlayVisible: boolean
@@ -364,6 +369,7 @@ function ReadView(inputProps: ReadViewProps) {
 
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
+            <StatusBar hidden={!props.overlayVisible} />
             <BatteryStatusDisplay interval={30 * 1000} />
             <InfoDisplay text={`${props.pageIndex + 1}/${props.chapter.pages.length} ${props.chapter.meta.title}`} />
             <TextClock format="hh:mm A" interval={1000} />
@@ -375,22 +381,25 @@ function ReadView(inputProps: ReadViewProps) {
                 scrollEnabled={!props.overlayVisible}>
 
                 <View key={nextNext ? nextNext.source.uri : "prev"}>
-                    <FastImage
+                    <ProgressImage
                         resizeMode="contain"
+                        indicator={Progress.Pie}
                         style={{ width: '100%', height: '100%' }}
                         source={nextNext && nextNext.source} />
                 </View>
 
                 <View key={next ? next.source.uri : "next"}>
-                    <FastImage
+                    <ProgressImage
                         resizeMode="contain"
+                        indicator={Progress.Pie}
                         style={{ width: '100%', height: '100%' }}
                         source={next && next.source} />
                 </View>
 
                 <View key={current.source.uri}>
-                    <FastImage
+                    <ProgressImage
                         resizeMode="contain"
+                        indicator={Progress.Pie}
                         style={{ width: '100%', height: '100%' }}
                         source={{
                             ...current.source,
@@ -407,8 +416,9 @@ function ReadView(inputProps: ReadViewProps) {
                 </View>
 
                 <View key={prev ? prev.source.uri : "prev"}>
-                    <FastImage
+                    <ProgressImage
                         resizeMode="contain"
+                        indicator={Progress.Pie}
                         style={{ width: '100%', height: '100%' }}
                         source={prev && prev.source} />
                 </View>
