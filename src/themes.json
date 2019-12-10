@@ -19,6 +19,36 @@
                 "dark": "white",
                 "light": "white"
             }
+        },
+        "background": {
+            "color": "#ffffff",
+            "text": "#000000"
+        }
+    },
+    "Dark": {
+        "primary": {
+            "default": "#4a148c",
+            "light": "#12005e",
+            "dark": "#7c43bd",
+            "text": {
+                "default": "white",
+                "dark": "white",
+                "light": "white"
+            }
+        },
+        "secondary": {
+            "default": "#004d40",
+            "light": "#00251a",
+            "dark": "#39796b",
+            "text": {
+                "default": "white",
+                "dark": "white",
+                "light": "white"
+            }
+        },
+        "background": {
+            "color": "#121212",
+            "text": "#ffffff"
         }
     }
 }

@@ -1,101 +1,121 @@
 import { SearchResultFeeder, MangaInfo, MangaMeta, ChapterMeta, ChapterFeeder, ChapterInfo } from "src/MangaAPI"
 
-export type Actions = SearchViewActions | MangaInfoViewActions | ReadViewActions | APIActions
+type Actions = SearchViewActions | MangaInfoViewActions | ReadViewActions | APIActions | ThemeActions | NavigationActions
 
-export type SearchViewActions = SearchViewClear | SearchViewOnSearch | SearchViewOnMoreReceived | SearchViewOnFeederReady | SearchViewOnFeederFailed
+type ThemeActions = ThemeToggleDark
 
-export interface SearchViewClear {
+type ThemeToggleDark = {
+    type: "theme_toggledark"
+}
+
+type SearchViewActions = SearchViewClear | SearchViewOnSearch | SearchViewOnMoreReceived | SearchViewOnFeederReady | SearchViewOnFeederFailed
+
+interface SearchViewClear {
     type: "searchview_clear"
 }
 
-export interface SearchViewOnSearch {
+interface SearchViewOnSearch {
     type: "searchview_onsearch"
 }
 
-export interface SearchViewOnFeederReady {
+interface SearchViewOnFeederReady {
     type: "searchview_onfeederready"
     feeder: SearchResultFeeder
 }
 
-export interface SearchViewOnFeederFailed {
+interface SearchViewOnFeederFailed {
     type: "searchview_onfeederfailed"
 }
 
-export interface SearchViewOnMoreReceived {
+interface SearchViewOnMoreReceived {
     type: "searchview_onmorereceived"
     entries: MangaMeta[]
 }
 
-export type MangaInfoViewActions = MangaInfoViewClear | MangaInfoViewSetInfo
+type MangaInfoViewActions = MangaInfoViewClear | MangaInfoViewSetInfo
 
-export interface MangaInfoViewClear {
+interface MangaInfoViewClear {
     type: "mangainfoview_clear"
 }
 
-export interface MangaInfoViewSetInfo {
+interface MangaInfoViewSetInfo {
     type: "mangainfoview_setinfo"
     info: MangaInfo
 }
 
-export type ReadViewActions = ReadViewClear | ReadViewFeederReady |
-    ReadViewFeederFailed | ReadViewChapterReady | ReadViewChapterFailed | ReadViewSetPage | ReadViewToggleOverlay | ReadViewToggleHand
+type ReadViewActions = ReadViewClear | ReadViewFeederReady | ReadViewFeederFailed
+    | ReadViewChapterReady | ReadViewChapterFailed | ReadViewSetPage
+    | ReadViewToggleOverlay | ReadViewToggleHand | ReadViewToggleDoublePage
 
-export interface ReadViewClear {
+interface ReadViewClear {
     type: "readview_clear"
 }
 
-export interface ReadViewFeederReady {
+interface ReadViewFeederReady {
     type: "readview_feederready"
     feeder: ChapterFeeder
 }
 
-export interface ReadViewFeederFailed {
+interface ReadViewFeederFailed {
     type: "readview_feederfailed"
 }
 
-export interface ReadViewChapterReady {
+interface ReadViewChapterReady {
     type: "readview_chapterready"
     chapter: ChapterInfo
 }
 
-export interface ReadViewChapterFailed {
+interface ReadViewChapterFailed {
     type: "readview_chapterfailed"
 }
 
-export interface ReadViewSetPage {
+interface ReadViewSetPage {
     type: "readview_setpage"
     page: number
 }
 
-export interface ReadViewToggleOverlay {
+interface ReadViewToggleOverlay {
     type: "readview_toggleoverlay"
 }
 
-export interface ReadViewToggleHand {
+interface ReadViewToggleHand {
     type: "readview_togglehand"
 }
 
-export type APIActions = APISetCurrent | APIStorageActions
+interface ReadViewToggleDoublePage {
+    type: "readview_toggledoublepage"
+}
 
-export interface APISetCurrent {
+type APIActions = APISetCurrent | APIStorageActions
+
+interface APISetCurrent {
     type: "api_setcurrent"
     current: string
 }
 
-export type APIStorageActions = APIStorageAddFavorite | APIStorageRemoveFavorite | APIStorageSetHistory
+type APIStorageActions = APIStorageAddFavorite | APIStorageRemoveFavorite | APIStorageSetHistory
 
-export interface APIStorageAddFavorite {
+interface APIStorageAddFavorite {
     type: "api_storage_addfavorite"
     meta: MangaMeta
 }
 
-export interface APIStorageRemoveFavorite {
+interface APIStorageRemoveFavorite {
     type: "api_storage_removefavorite"
     meta: MangaMeta
 }
 
-export interface APIStorageSetHistory {
+interface APIStorageSetHistory {
     type: "api_storage_sethistory"
     chapter: ChapterMeta
     page: number
 }
+
+type NavigationActions = NavigationSetState
+
+interface NavigationSetState {
+    type: "navigation_setstate"
+    state: any
+}
+
+export default Actions

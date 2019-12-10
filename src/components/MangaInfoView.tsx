@@ -6,7 +6,7 @@ import { connect, ConnectedProps } from 'react-redux'
 import { ThemeContext } from 'src/Theme'
 import { MangaMeta, ChapterFeeder, ChapterInfo, ChapterMeta } from 'src/MangaAPI'
 import MangaInfoCard from './MangaInfoCard'
-import { Actions } from 'src/state/actions'
+import Actions from 'src/state/actions'
 
 const mapState = (state: MainStates) => ({
     info: state.mangaInfoViewStates.info,

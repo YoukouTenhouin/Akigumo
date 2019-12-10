@@ -7,7 +7,7 @@ import { MainStates } from 'src/state/types'
 import { MangaInfo } from 'src/MangaAPI'
 import MangaInfoCard from './MangaInfoCard'
 import { ThemeContext } from 'src/Theme'
-import { Actions } from 'src/state/actions'
+import Actions from 'src/state/actions'
 
 const mapState = (state: MainStates) => ({
     api: state.api.interfaces[state.api.current],

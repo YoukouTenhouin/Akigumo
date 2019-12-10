@@ -1,15 +1,13 @@
 import { combineReducers } from 'redux'
 import { persistReducer } from 'redux-persist'
 
-import { SearchViewActions, MangaInfoViewActions, APIActions, ReadViewActions } from 'src/state/actions'
+import Actions from 'src/state/actions'
 import { SearchViewStates, MangaInfoViewStates, ReadViewStates, APIStates } from 'src/state/types';
 import ManhuaguiAPI from 'src/sources/Manhuagui';
 import ManhuaduiAPI from 'src/sources/Manhuadui';
 import AsyncStorage from '@react-native-community/async-storage';
-import autoMergeLevel1 from 'redux-persist/es/stateReconciler/autoMergeLevel1';
-import hardSet from 'redux-persist/es/stateReconciler/hardSet';
 
-function SearchViewReducer(state: SearchViewStates | undefined, actions: SearchViewActions) {
+function SearchViewReducer(state: SearchViewStates | undefined, actions: Actions) {
     if (!state)
         state = {
             results: []
@@ -39,7 +37,7 @@ function SearchViewReducer(state: SearchViewStates | undefined, actions: SearchV
     return state
 }
 
-function MangaInfoViewReducer(state: MangaInfoViewStates | undefined, actions: MangaInfoViewActions) {
+function MangaInfoViewReducer(state: MangaInfoViewStates | undefined, actions: Actions) {
     switch (actions.type) {
         case "mangainfoview_clear":
             return {}
@@ -49,19 +47,21 @@ function MangaInfoViewReducer(state: MangaInfoViewStates | undefined, actions: M
     return state || {}
 }
 
-function ReadViewReducer(state: ReadViewStates | undefined, actions: ReadViewActions) {
+function ReadViewReducer(state: ReadViewStates | undefined, actions: Actions) {
     if (!state)
         state = {
             pageIndex: 0,
             overlayVisible: false,
-            leftHand: false
+            leftHand: false,
+            doublePage: false
         }
     switch (actions.type) {
         case "readview_clear":
             return {
                 pageIndex: 0,
                 overlayVisible: false,
-                leftHand: false
+                leftHand: false,
+                doublePage: false
             }
         case "readview_feederready":
             return {
@@ -88,11 +88,16 @@ function ReadViewReducer(state: ReadViewStates | undefined, actions: ReadViewAct
                 ...state,
                 leftHand: !state.leftHand
             }
+        case "readview_toggledoublepage":
+            return {
+                ...state,
+                doublePage: !state.doublePage
+            }
     }
     return state
 }
 
-function APIReducer(state: APIStates | undefined, actions: APIActions) {
+function APIReducer(state: APIStates | undefined, actions: Actions) {
     if (!state)
         state = {
             interfaces: {
@@ -111,8 +116,7 @@ function APIReducer(state: APIStates | undefined, actions: APIActions) {
             },
             current: "manhuagui",
         }
-    
-    let currentStorage
+
     switch (actions.type) {
         case "api_setcurrent":
             return {
@@ -161,6 +165,27 @@ function APIReducer(state: APIStates | undefined, actions: APIActions) {
     return state
 }
 
+function ThemeReducer(state: string | undefined, action: Actions) {
+    if (!state)
+        return "default"
+    switch (action.type) {
+        case "theme_toggledark":
+            return state == "default" ? "dark" : "default"
+    }
+    return state
+}
+
+function NavigationReducer(state: any, action: Actions) {
+    if (state === undefined)
+        return null
+    switch (action.type) {
+        case "navigation_setstate":
+            console.log('from action:', action.state)
+            return action.state 
+    }
+    return state
+}
+
 const APIPersistConfig = {
     key: 'akigumov2_api',
     storage: AsyncStorage,
@@ -171,13 +196,15 @@ const mainReducer = combineReducers({
     api: persistReducer(APIPersistConfig, APIReducer),
     mangaInfoViewStates: MangaInfoViewReducer,
     searchViewStates: SearchViewReducer,
-    readViewStates: ReadViewReducer
+    readViewStates: ReadViewReducer,
+    themeState: ThemeReducer,
+    navigationState: NavigationReducer
 })
 
 const persistConfig = {
     key: 'akigumov2',
     storage: AsyncStorage,
-    whitelist: []
+    blacklist: ["api"]
 }
 
 export default persistReducer(persistConfig, mainReducer);

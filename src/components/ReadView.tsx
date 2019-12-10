@@ -6,14 +6,15 @@ import Slider from '@react-native-community/slider'
 import moment from 'moment'
 import FastImage from 'react-native-fast-image'
 import * as Progress from 'react-native-progress'
-import Image from 'react-native-image-progress'
 import { createImageProgress } from 'react-native-image-progress'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import { MainStates } from 'src/state/types'
 import { ChapterMeta, ChapterInfo, PageInfo, ChapterFeeder } from 'src/MangaAPI'
-import { Actions } from 'src/state/actions'
+import Actions from 'src/state/actions'
 import FullScreen from 'src/FullScreen'
 import BatteryStatus from 'src/BatteryStatus'
+import { ThemeContext } from 'src/Theme'
 
 const ProgressImage = createImageProgress(FastImage)
 
@@ -87,105 +88,149 @@ function TouchResponder(props: TouchResponderProps) {
 interface OverlayControlsProps {
     onPressNextChapter: () => void
     onPressPrevChapter: () => void
+    onPressToggleHand: () => void
+    onPressToggleDoublePage: () => void
+    onToggleDark: () => void
     onSetPage: (page: number) => void
     totalPages: number
     page: number
+    leftHand: boolean
+    doublePage: boolean
+    darkMode: boolean
 }
 
 function OverlayControls(props: OverlayControlsProps) {
-    let navbarHeight = (
-        Dimensions.get('screen').height
-        - Dimensions.get('window').height
-    )
-
-    const styles = StyleSheet.create({
-        container: {
-            position: "absolute",
-            bottom: navbarHeight,
-            left: 0,
-            right: 0,
-            height: 100,
-            backgroundColor: "#212121",
-            flexDirection: "column"
-        },
-        columnWrapper: {
-            flex: 1,
-            flexDirection: "row",
-            padding: 10
-        },
-        button: {
-            height: "100%",
-            color: "white",
-            flex: 1
-        },
-        buttonText: {
-            height: "100%",
-            width: "100%",
-            color: "white",
-            textAlign: "center",
-            textAlignVertical: "center"
-        }
-    })
-
-    const PageSlider = (props: { page: number, total: number, style?: any, onSetPage: (page: number) => void }) => {
-        const [displayPage, setDisplayPage] = React.useState<number>(props.page)
-
-        const styles = StyleSheet.create({
-            wrapper: {
-                flex: 1,
-                flexDirection: "row"
-            },
-            text: {
-                color: "white",
-                width: 30,
-                textAlign: "center",
-                textAlignVertical: "center"
-            },
-            slider: {
-                height: "100%",
-                flexGrow: 1,
-            }
-        })
-
-        return (
-            <View style={styles.wrapper}>
-                <Text style={styles.text}>{displayPage + 1}</Text>
-                <Slider
-                    style={styles.slider}
-                    maximumValue={props.total - 1}
-                    minimumValue={0}
-                    step={1}
-                    value={props.page}
-                    onValueChange={setDisplayPage}
-                    onSlidingComplete={props.onSetPage} />
-                <Text style={styles.text}>{props.total}</Text>
-            </View>
-        )
-    }
-
     return (
-        <View style={styles.container}>
-            <View style={styles.columnWrapper}>
-                <View style={styles.button}>
-                    <TouchableOpacity onPress={props.onPressPrevChapter}>
-                        <Text style={styles.buttonText}>Prev Chap</Text>
-                    </TouchableOpacity>
-                </View>
+        <ThemeContext.Consumer>
+            {theme => {
+                let navbarHeight = (
+                    Dimensions.get('screen').height
+                    - Dimensions.get('window').height
+                )
 
-                <View style={styles.button}>
-                    <TouchableOpacity onPress={props.onPressNextChapter}>
-                        <Text style={styles.buttonText}>Next Chap</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                const styles = StyleSheet.create({
+                    container: {
+                        position: "absolute",
+                        bottom: navbarHeight,
+                        left: 0,
+                        right: 0,
+                        height: 100,
+                        backgroundColor: theme.background.color,
+                        flexDirection: "column"
+                    },
+                    columnWrapper: {
+                        flex: 1,
+                        flexDirection: "row",
+                        padding: 10
+                    },
+                    button: {
+                        height: "100%",
+                        flex: 1
+                    },
+                    buttonText: {
+                        height: "100%",
+                        width: "100%",
+                        fontSize: 24,
+                        textAlign: "center",
+                        textAlignVertical: "center"
+                    },
+                })
 
-            <View style={styles.columnWrapper}>
-                <PageSlider
-                    page={props.page}
-                    total={props.totalPages}
-                    onSetPage={props.onSetPage} />
-            </View>
-        </View >
+                const PageSlider = (props: { page: number, total: number, style?: any, onSetPage: (page: number) => void }) => {
+                    const [displayPage, setDisplayPage] = React.useState<number>(props.page)
+
+                    const styles = StyleSheet.create({
+                        wrapper: {
+                            flex: 1,
+                            flexDirection: "row",
+                        },
+                        text: {
+                            color: theme.background.text,
+                            width: 30,
+                            textAlign: "center",
+                            textAlignVertical: "center"
+                        },
+                        slider: {
+                            height: "100%",
+                            flexGrow: 1,
+                        }
+                    })
+
+                    return (
+                        < View style={styles.wrapper} >
+                            <Text style={styles.text}>{displayPage + 1}</Text>
+                            <Slider
+                                style={styles.slider}
+                                maximumValue={props.total - 1}
+                                minimumValue={0}
+                                step={1}
+                                value={props.page}
+                                onValueChange={setDisplayPage}
+                                onSlidingComplete={props.onSetPage} />
+                            <Text style={styles.text}>{props.total}</Text>
+                        </View>
+                    )
+                }
+
+                return (
+                    <View style={styles.container}>
+                        <View style={styles.columnWrapper}>
+                            <View style={styles.button}>
+                                <TouchableOpacity onPress={props.onPressPrevChapter}>
+                                    <Icon
+                                        name="fast-rewind"
+                                        style={styles.buttonText}
+                                        color={theme.background.text} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.button}>
+                                <TouchableOpacity onPress={props.onPressToggleHand}>
+                                    <Icon
+                                        name={props.leftHand ? "border-left" : "border-right"}
+                                        style={styles.buttonText}
+                                        color={theme.background.text} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.button}>
+                                <TouchableOpacity onPress={props.onToggleDark}>
+                                    <Icon
+                                        name={props.darkMode ? "brightness-4" : "brightness-7"}
+                                        style={styles.buttonText}
+                                        color={theme.background.text} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.button}>
+                                <TouchableOpacity onPress={props.onPressToggleDoublePage}>
+                                    <Icon
+                                        name="import-contacts"
+                                        style={styles.buttonText}
+                                        color={props.doublePage ? theme.primary.default : theme.background.text} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.button}>
+                                <TouchableOpacity onPress={props.onPressNextChapter}>
+                                    <Icon
+                                        name="fast-forward"
+                                        style={styles.buttonText}
+                                        color={theme.background.text} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <View style={styles.columnWrapper}>
+                            <PageSlider
+                                page={props.page}
+                                total={props.totalPages}
+                                onSetPage={props.onSetPage} />
+                        </View>
+                    </View >
+                )
+            }}
+        </ThemeContext.Consumer>
     )
 }
 
@@ -194,14 +239,19 @@ const mapStates = (state: MainStates) => ({
     chapter: state.readViewStates.chapter,
     pageIndex: state.readViewStates.pageIndex,
     overlayVisible: state.readViewStates.overlayVisible,
-    leftHand: state.readViewStates.leftHand
+    leftHand: state.readViewStates.leftHand,
+    doublePage: state.readViewStates.doublePage,
+    darkMode: state.themeState == "dark"
 })
 
 const mapDispatch = {
     dispatchHistory: (chapter: ChapterMeta, page: number): Actions => ({ type: "api_storage_sethistory", chapter: chapter, page: page }),
     dispatchSetPage: (page: number): Actions => ({ type: "readview_setpage", page: page }),
     dispatchChapterReady: (chapter: ChapterInfo): Actions => ({ type: "readview_chapterready", chapter: chapter }),
-    dispatchToggleOverlay: (): Actions => ({ type: "readview_toggleoverlay" })
+    dispatchToggleOverlay: (): Actions => ({ type: "readview_toggleoverlay" }),
+    dispatchToggleHand: (): Actions => ({ type: "readview_togglehand" }),
+    dispatchToggleDoublePage: (): Actions => ({ type: "readview_toggledoublepage" }),
+    dispatchToggleDarkMode: (): Actions => ({ type: "theme_toggledark" })
 }
 
 const connector = connect(
@@ -304,6 +354,7 @@ function ReadView(inputProps: ReadViewProps) {
     let current = pageByOff(0) as PageInfo
     let next = pageByOff(1)
     let nextNext = pageByOff(2)
+    let nextNextNext = pageByOff(3)
 
     const viewPager = React.useRef<ViewPager>(null)
 
@@ -367,75 +418,115 @@ function ReadView(inputProps: ReadViewProps) {
     FullScreen.set(true, props.overlayVisible)
     React.useEffect(() => (() => FullScreen.disable()), [])
 
+    const SinglePageView = () => (
+        <ViewPager
+            ref={viewPager}
+            style={{ flex: 1 }}
+            initialPage={2}
+            onPageSelected={e => onPageSelected(e.nativeEvent.position)}
+            scrollEnabled={!props.overlayVisible}>
+
+            <View key={nextNext ? nextNext.source.uri : "prev"}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={nextNext && nextNext.source} />
+            </View>
+
+            <View key={next ? next.source.uri : "next"}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={next && next.source} />
+            </View>
+
+            <View key={current.source.uri}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={{
+                        ...current.source,
+                        priority: FastImage.priority.high
+                    }} />
+                {!props.overlayVisible ? (
+                    <TouchResponder
+                        overlayVisible={props.overlayVisible}
+                        leftHand={props.leftHand}
+                        onPressNext={() => viewPager.current && viewPager.current.setPage(1)}
+                        onPressPrev={() => viewPager.current && viewPager.current.setPage(3)}
+                        onToggleOverlay={props.dispatchToggleOverlay} />
+                ) : null}
+            </View>
+
+            <View key={prev ? prev.source.uri : "prev"}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={prev && prev.source} />
+            </View>
+        </ViewPager>
+    )
+
+    const DoublePageView = () => (
+        <View style={{ flex: 1, flexDirection: "row" }}>
+            <View style={{ flex: 1 }}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={next && next.source} />
+            </View>
+
+            <View style={{ flex: 1 }}>
+                <ProgressImage
+                    resizeMode="contain"
+                    indicator={Progress.Pie}
+                    style={{ width: '100%', height: '100%' }}
+                    source={current.source} />
+            </View>
+
+            {/* Preload prev and nextNext */}
+            <View style={{ width: 0, height: 0 }}>
+                <ProgressImage source={prev && prev.source} />
+                <ProgressImage source={nextNext && nextNext.source} />
+                <ProgressImage source={nextNextNext && nextNextNext.source} />
+            </View>
+        </View>
+    )
+
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
             <StatusBar hidden={!props.overlayVisible} />
             <BatteryStatusDisplay interval={30 * 1000} />
             <InfoDisplay text={`${props.pageIndex + 1}/${props.chapter.pages.length} ${props.chapter.meta.title}`} />
             <TextClock format="hh:mm A" interval={1000} />
-            <ViewPager
-                ref={viewPager}
-                style={{ flex: 1 }}
-                initialPage={2}
-                onPageSelected={e => onPageSelected(e.nativeEvent.position)}
-                scrollEnabled={!props.overlayVisible}>
 
-                <View key={nextNext ? nextNext.source.uri : "prev"}>
-                    <ProgressImage
-                        resizeMode="contain"
-                        indicator={Progress.Pie}
-                        style={{ width: '100%', height: '100%' }}
-                        source={nextNext && nextNext.source} />
-                </View>
+            {props.doublePage ? (<DoublePageView />) : (<SinglePageView />)}
 
-                <View key={next ? next.source.uri : "next"}>
-                    <ProgressImage
-                        resizeMode="contain"
-                        indicator={Progress.Pie}
-                        style={{ width: '100%', height: '100%' }}
-                        source={next && next.source} />
-                </View>
-
-                <View key={current.source.uri}>
-                    <ProgressImage
-                        resizeMode="contain"
-                        indicator={Progress.Pie}
-                        style={{ width: '100%', height: '100%' }}
-                        source={{
-                            ...current.source,
-                            priority: FastImage.priority.high
-                        }} />
-                    {!props.overlayVisible ? (
-                        <TouchResponder
-                            overlayVisible={props.overlayVisible}
-                            leftHand={props.leftHand}
-                            onPressNext={() => viewPager.current && viewPager.current.setPage(1)}
-                            onPressPrev={() => viewPager.current && viewPager.current.setPage(3)}
-                            onToggleOverlay={props.dispatchToggleOverlay} />
-                    ) : null}
-                </View>
-
-                <View key={prev ? prev.source.uri : "prev"}>
-                    <ProgressImage
-                        resizeMode="contain"
-                        indicator={Progress.Pie}
-                        style={{ width: '100%', height: '100%' }}
-                        source={prev && prev.source} />
-                </View>
-            </ViewPager>
-            {props.overlayVisible ? (
+            {props.overlayVisible || props.doublePage ? (
                 <TouchResponder
                     overlayVisible={props.overlayVisible}
                     leftHand={props.leftHand}
-                    onPressNext={() => viewPager.current && viewPager.current.setPage(1)}
-                    onPressPrev={() => viewPager.current && viewPager.current.setPage(3)}
+                    onPressNext={onNextPage}
+                    onPressPrev={onPrevPage}
                     onToggleOverlay={props.dispatchToggleOverlay} />
             ) : null}
+
             {props.overlayVisible ? (
                 <OverlayControls
                     onPressNextChapter={onNextChapter}
                     onPressPrevChapter={onPrevChapterPress}
                     onSetPage={props.dispatchSetPage}
+                    onPressToggleDoublePage={props.dispatchToggleDoublePage}
+                    onPressToggleHand={props.dispatchToggleHand}
+                    onToggleDark={props.dispatchToggleDarkMode}
+                    leftHand={props.leftHand}
+                    doublePage={props.doublePage}
+                    darkMode={props.darkMode}
                     page={props.pageIndex}
                     totalPages={props.chapter.pages.length} />
             ) : null}

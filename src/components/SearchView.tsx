@@ -42,10 +42,14 @@ function SearchView(props: SearchViewProps) {
                     <View style={{ flexGrow: 1, flexDirection: "column", padding: 10 }} key="search">
                         <View style={{ height: 50 }}>
                             <TextInput
+                                style={{
+                                    color: theme.background.text
+                                }}
                                 placeholder="Search"
+                                placeholderTextColor={theme.background.text}
                                 onSubmitEditing={ev => {
                                     props.dispatchSearch()
-                                    props.api.search(ev.nativeEvent.text, 
+                                    props.api.search(ev.nativeEvent.text,
                                         feeder => {
                                             if (!feeder)
                                                 return
@@ -64,7 +68,7 @@ function SearchView(props: SearchViewProps) {
                                     <MangaInfoCard
                                         coverSource={item.item.coverSource}
                                         title={item.item.title}
-                                        onPress={() =>{
+                                        onPress={() => {
                                             props.dispatchMangaInfoClear()
                                             props.api.getManga(item.item, props.dispatchMangaInfoSet)
                                             props.toMangaInfoView()

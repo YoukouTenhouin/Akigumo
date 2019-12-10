@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Default } from 'src/themes.json'
+import { Default, Dark } from 'src/themes.json'
 
 export interface Theme {
     primary: {
@@ -17,4 +17,4 @@ export interface Theme {
 
 const ThemeContext = React.createContext(Default)
 
-export { ThemeContext, Default }
+export { ThemeContext, Default, Dark }

@@ -15,6 +15,7 @@ export interface ReadViewStates {
     pageIndex: number
     overlayVisible: boolean
     leftHand: boolean
+    doublePage: boolean
 }
 
 interface HistoryEntries {
@@ -45,4 +46,6 @@ export interface MainStates {
     searchViewStates: SearchViewStates
     mangaInfoViewStates: MangaInfoViewStates
     readViewStates: ReadViewStates
+    themeState: "default" | "dark"
+    navigationState?: any
 }
