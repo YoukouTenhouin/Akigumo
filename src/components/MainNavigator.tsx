@@ -12,7 +12,7 @@ import SettingsView from "./SettingsView"
 import { createAppContainer } from "react-navigation"
 import { MainStates } from "src/state/types"
 import Actions from "src/state/actions"
-import { connect, ConnectedProps } from "react-redux"
+import { connect, ConnectedProps, ReactReduxContext } from "react-redux"
 
 const BackgroundWrapper = (props: { children: any, style?: any }) => (
     <ThemeContext.Consumer>
@@ -106,12 +106,10 @@ const styles = StyleSheet.create({
 
 const navWraperMapState = (state: MainStates) => ({
     darkMode: state.themeState == "dark",
-    navigationState: state.navigationState
 })
 
 const navWrapperMapDispatch = {
     toggleDarkMode: (): Actions => ({ type: "theme_toggledark" }),
-    setState: (state: any): Actions => ({ type: "navigation_setstate", state: state })
 }
 
 const navWrapperConnector = connect(
@@ -146,34 +144,46 @@ const HeaderButtons = (props: {
 function NavWrapper(props: navWrapperProps) {
     return (
         <ThemeContext.Consumer>
-            {theme => {
-                const MainNavigator = createStackNavigator({
-                    FavoriteView: { screen: FavoritesViewScreen },
-                    SearchView: { screen: SearchViewScreen },
-                    SettingsView: { screen: SettingsViewScreen },
-                    MangaInfoView: { screen: MangaInfoViewScreen },
-                    ReadView: { screen: ReadViewScreen }
-                }, {
-                    defaultNavigationOptions: (navProps: any) => ({
-                        headerTintColor: theme.primary.text.default,
-                        headerStyle: {
-                            backgroundColor: theme.primary.default
-                        },
-                        headerRight: () => (
-                            <HeaderButtons
-                                darkMode={props.darkMode}
-                                onToggleDark={props.toggleDarkMode}
-                                onOpenSettings={() => navProps.navigation.push('SettingsView')} />
-                        )
-                    })
-                })
+            {theme => (
+                <ReactReduxContext.Consumer>
+                    {store => {
+                        const MainNavigator = createStackNavigator({
+                            FavoriteView: { screen: FavoritesViewScreen },
+                            SearchView: { screen: SearchViewScreen },
+                            SettingsView: { screen: SettingsViewScreen },
+                            MangaInfoView: { screen: MangaInfoViewScreen },
+                            ReadView: { screen: ReadViewScreen }
+                        }, {
+                            defaultNavigationOptions: (navProps: any) => ({
+                                headerTintColor: theme.primary.text.default,
+                                headerStyle: {
+                                    backgroundColor: theme.primary.default
+                                },
+                                headerRight: () => (
+                                    <HeaderButtons
+                                        darkMode={props.darkMode}
+                                        onToggleDark={props.toggleDarkMode}
+                                        onOpenSettings={() => navProps.navigation.push('SettingsView')} />
+                                )
+                            })
+                        })
 
-                const AppContainer = createAppContainer(MainNavigator)
+                        const AppContainer = createAppContainer(MainNavigator)
 
-                return <AppContainer
-                    persistNavigationState={state => { props.setState(state); return new Promise<any>(resolve => resolve())}}
-                    loadNavigationState={() => new Promise<any>((resolve, reject) => props.navigationState ? resolve(props.navigationState) : reject())} />
-            }}
+                        /* passing in navigationState will cause MainNavigation to be re-rendered every time navigationState is change,
+                         * so we access store explicitly here to avoid flickering */
+
+                        return <AppContainer
+                            persistNavigationState={state => {
+                                store.store.dispatch<Actions>({ type: "navigation_setstate", state: state })
+                                return new Promise<any>(resolve => resolve())
+                            }}
+                            loadNavigationState={() => new Promise<any>((resolve, reject) => (
+                                store.store.getState().navigationState ? resolve(store.store.getState().navigationState) : reject())
+                            )} />
+                    }}
+                </ReactReduxContext.Consumer>
+            )}
         </ThemeContext.Consumer>
     )
 }
