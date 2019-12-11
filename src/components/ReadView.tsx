@@ -359,7 +359,7 @@ function ReadView(inputProps: ReadViewProps) {
     const viewPager = React.useRef<ViewPager>(null)
 
     const onNextChapter = () => {
-        props.feeder.next(chapter => {
+        props.feeder.next().then(chapter => {
             if (chapter) {
                 props.dispatchSetPage(0)
                 props.dispatchHistory(chapter.meta, 0)
@@ -370,7 +370,7 @@ function ReadView(inputProps: ReadViewProps) {
     }
 
     const onPrevChapter = () => {
-        props.feeder.prev(chapter => {
+        props.feeder.prev().then(chapter => {
             if (chapter) {
                 props.dispatchHistory(chapter.meta, chapter.pages.length - 1)
                 props.dispatchChapterReady(chapter)
@@ -381,7 +381,7 @@ function ReadView(inputProps: ReadViewProps) {
     }
 
     const onPrevChapterPress = () => {
-        props.feeder.prev(chapter => {
+        props.feeder.prev().then(chapter => {
             if (chapter) {
                 props.dispatchHistory(chapter.meta, 0)
                 props.dispatchChapterReady(chapter)

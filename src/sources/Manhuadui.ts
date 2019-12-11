@@ -142,10 +142,10 @@ class ManhuaduiChapterFeeder implements ChapterFeeder {
         this.mangaId = meta.mangaNo
     }
 
-    current(callback: (chapter?: ChapterInfo) => void) {
+    async current() {
         const pageUrl = `https://www.manhuadui.com/manhua/${this.mangaId}/${this.chapterId}.html`
         console.log(`fetching ${pageUrl}`)
-        fetch(pageUrl, {
+        return fetch(pageUrl, {
             headers: {
                 'User-Agent': userAgent
             }
@@ -153,31 +153,31 @@ class ManhuaduiChapterFeeder implements ChapterFeeder {
             let parseResult = parseComicHTML(html, pageUrl)
             this.prevChapter = parseResult.prevChapter
             this.nextChapter = parseResult.nextChapter
-            callback({
+            return {
                 meta: {
                     title: parseResult.title,
                     mangaNo: this.mangaId,
                     chapterNo: this.chapterId
                 },
                 pages: parseResult.sources.map((item: any) => ({ source: item }))
-            })
+            }
         }))
     }
 
-    prev(callback: (chapter?: ChapterInfo) => void) {
+    async prev() {
         if (!this.prevChapter)
-            return callback()
+            return null
 
         this.chapterId = this.prevChapter
-        this.current(callback)
+        return this.current()
     }
 
-    next(callback: (chapter?: ChapterInfo) => void) {
+    async next() {
         if (!this.nextChapter)
-            return callback()
+            return null
 
         this.chapterId = this.nextChapter
-        this.current(callback)
+        return this.current()
     }
 }
 
@@ -187,18 +187,18 @@ class ManhuaduiSearchResultFeeder implements SearchResultFeeder {
 
     constructor(private queryStr: string) { }
 
-    more(callback: (result: MangaMeta[]) => void) {
+    async more() {
         if (this.currentPage != 0 && this.currentPage * 36 >= this.totalResults)
-            return callback([])
+            return []
 
         this.currentPage += 1
 
         let searchUrl = `https://www.manhuadui.com/search/?keywords=${this.queryStr}&page=${this.currentPage}`
-        fetch(searchUrl, { headers: { 'User-Agent': userAgent } })
+        return fetch(searchUrl, { headers: { 'User-Agent': userAgent } })
             .then(res => res.text().then(html => {
                 let parseResult = parseSearchResult(html, searchUrl)
                 this.totalResults = parseResult.totalCount
-                callback(parseResult.results)
+                return parseResult.results
             }))
     }
 }
@@ -220,18 +220,18 @@ export default class ManhuaduiAPI implements MangaAPI {
         return entries.filter(item => item.id != entry.id)
     }
 
-    getManga(meta: MangaMeta, callback: (info: MangaInfo) => void) {
+    getManga(meta: MangaMeta) {
         let mangaUrl = `https://www.manhuadui.com/manhua/${meta.id}/`
 
-        fetch(mangaUrl, { headers: { 'User-Agent': userAgent } })
-            .then(res => res.text().then(html => callback(parseMangaHTML(html, meta, mangaUrl))))
+        return fetch(mangaUrl, { headers: { 'User-Agent': userAgent } })   
+            .then(res => res.text().then(html => parseMangaHTML(html, meta, mangaUrl)))
     }
 
-    search(str: string, callback: (feeder: SearchResultFeeder) => void) {
-        callback(new ManhuaduiSearchResultFeeder(str))
+    async search(str: string) {
+        return new ManhuaduiSearchResultFeeder(str)
     }
 
-    getChapterFeeder(chapter: ChapterMeta, callback: (feeder: ChapterFeeder) => void) {
-        callback(new ManhuaduiChapterFeeder(chapter))
+    async getChapterFeeder(chapter: ChapterMeta) {
+        return new ManhuaduiChapterFeeder(chapter)
     }
 }

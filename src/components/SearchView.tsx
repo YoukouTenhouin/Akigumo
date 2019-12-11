@@ -49,13 +49,14 @@ function SearchView(props: SearchViewProps) {
                                 placeholderTextColor={theme.background.text}
                                 onSubmitEditing={ev => {
                                     props.dispatchSearch()
-                                    props.api.search(ev.nativeEvent.text,
-                                        feeder => {
-                                            if (!feeder)
-                                                return
-                                            props.dispatchFeederReady(feeder)
-                                            feeder.more(props.dispatchMoreReceived)
-                                        })
+                                    props.api.search(ev.nativeEvent.text)
+                                        .then(
+                                            feeder => {
+                                                if (!feeder)
+                                                    return
+                                                props.dispatchFeederReady(feeder)
+                                                feeder.more().then(props.dispatchMoreReceived)
+                                            })
                                 }}
                                 underlineColorAndroid={theme.primary.default}
                             />
@@ -70,12 +71,12 @@ function SearchView(props: SearchViewProps) {
                                         title={item.item.title}
                                         onPress={() => {
                                             props.dispatchMangaInfoClear()
-                                            props.api.getManga(item.item, props.dispatchMangaInfoSet)
+                                            props.api.getManga(item.item).then(props.dispatchMangaInfoSet)
                                             props.toMangaInfoView()
                                         }}
                                     />}
                                 keyExtractor={item => item.id}
-                                onEndReached={() => props.feeder && props.feeder.more(props.dispatchMoreReceived)}
+                                onEndReached={() => props.feeder && props.feeder.more().then(props.dispatchMoreReceived)}
                             />
                         </View>
                     </View>

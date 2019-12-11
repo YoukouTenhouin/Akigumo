@@ -56,9 +56,9 @@ function MangaInfoView(props: MangaInfoViewProps) {
         props.dispatchReadViewClear()
         props.dispatchSetPage(page)
         props.toReadView()
-        props.api.getChapterFeeder(meta, feeder => {
+        props.api.getChapterFeeder(meta).then(feeder => {
             props.dispatchFeederReady(feeder)
-            feeder.current(chapter => chapter && props.dispatchChapterReady(chapter))
+            feeder.current().then(chapter => chapter && props.dispatchChapterReady(chapter))
         })
     }
 
