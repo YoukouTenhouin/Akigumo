@@ -81,11 +81,11 @@ export interface MangaAPI {
 
     /** Interfaces reserved for favorites / histories syncs */
     /** accept currently stored favorites, return new favorites */
-    getFavorite(current: MangaMeta[]): MangaMeta[]
+    getFavorite(current: MangaMeta[]): Promise<MangaMeta[]>
     /** accept currently stored favorites and a new favorite entry, return new favorites */
-    addFavorite(current: MangaMeta[], entry: MangaMeta): MangaMeta[]
+    addFavorite(current: MangaMeta[], entry: MangaMeta): Promise<MangaMeta[]>
     /** accept currently stored favorites and an entry to be removed, return new favorites */
-    removeFavorite(curent: MangaMeta[], entry: MangaMeta): MangaMeta[]
+    removeFavorite(curent: MangaMeta[], entry: MangaMeta): Promise<MangaMeta[]>
 
     /** Get [[MangaInfo]] from a [[MangaMeta]] */
     getManga(meta: MangaMeta): Promise<MangaInfo>

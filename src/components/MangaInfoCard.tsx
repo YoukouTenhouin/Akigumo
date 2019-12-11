@@ -83,6 +83,8 @@ export default function MangaInfoCard(props: MangaInfoCardProps) {
                     <FavoriteButton isFavorite={props.isFavorite} onPress={props.onPressFavorite} />
                 )
 
+                console.log(props.coverSource)
+
                 return (
                     <TouchableOpacity
                         disabled={!props.onPress}

@@ -4,10 +4,11 @@ import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import { MainStates } from 'src/state/types'
-import { MangaInfo } from 'src/MangaAPI'
+import { MangaInfo, MangaMeta } from 'src/MangaAPI'
 import MangaInfoCard from './MangaInfoCard'
 import { ThemeContext } from 'src/Theme'
 import Actions from 'src/state/actions'
+import { applyMiddleware } from 'redux'
 
 const mapState = (state: MainStates) => ({
     api: state.api.interfaces[state.api.current],
@@ -17,7 +18,8 @@ const mapState = (state: MainStates) => ({
 const mapDispatch = {
     dispatchSearchViewClear: (): Actions => ({ type: "searchview_clear" }),
     dispatchMangaInfoClear: () => ({ type: "mangainfoview_clear" }),
-    dispatchMangaInfoSetInfo: (info: MangaInfo) => ({ type: "mangainfoview_setinfo", info: info })
+    dispatchMangaInfoSetInfo: (info: MangaInfo) => ({ type: "mangainfoview_setinfo", info: info }),
+    dispatchSetFavorite: (entries: MangaMeta[]): Actions => ({ type: "api_storage_setfavorite", entries: entries})
 }
 
 const connector = connect(
@@ -68,6 +70,16 @@ function SearchButton(props: { onPress: () => void }) {
 }
 
 function FavoritesView(props: FavoritesViewProps) {
+    const [refreshing, setRefreshing] = React.useState(false)
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+        props.dispatchSetFavorite(
+            await props.api.getFavorite(props.entries)
+        )
+        setRefreshing(false)
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <View style={{ flexGrow: 1, padding: 10 }}>
@@ -84,6 +96,8 @@ function FavoritesView(props: FavoritesViewProps) {
                             }}
                         />)
                     }}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
                     keyExtractor={(item) => item.id}
                     style={{ flex: 1 }}
                 />

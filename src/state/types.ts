@@ -36,8 +36,8 @@ export interface SourceStorages {
 }
 
 export interface APIStates {
-    interfaces: SourceInterfaces,
-    storages: SourceStorages, 
+    interfaces: SourceInterfaces
+    storages: SourceStorages 
     current: string
 }
 
