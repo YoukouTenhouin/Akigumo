@@ -47,6 +47,7 @@ function SettingsView(props: SettingsViewProps) {
                             onValueChange={props.dispatchAPISetCurrent} >
                             <Picker.Item label="manhuagui.com" value="manhuagui" />
                             <Picker.Item label="manhuadui.com" value="manhuadui" />
+                            <Picker.Item label="local" value="local" />
                         </Picker>
                     </ScrollView>
                 )

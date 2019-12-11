@@ -72,6 +72,14 @@ function SearchButton(props: { onPress: () => void }) {
 function FavoritesView(props: FavoritesViewProps) {
     const [refreshing, setRefreshing] = React.useState(false)
 
+    const onRefresh = async () => {
+        setRefreshing(true)
+        props.dispatchSetFavorite(
+            await props.api.getFavorite(props.entries)
+        )
+        setRefreshing(false)
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <View style={{ flexGrow: 1, padding: 10 }}>
@@ -89,13 +97,7 @@ function FavoritesView(props: FavoritesViewProps) {
                         />)
                     }}
                     refreshing={refreshing}
-                    onRefresh={async () => {
-                        setRefreshing(true)
-                        props.dispatchSetFavorite(
-                            await props.api.getFavorite(props.entries)
-                        )
-                        setRefreshing(false)
-                    }}
+                    onRefresh={onRefresh}
                     keyExtractor={(item) => item.id}
                     style={{ flex: 1 }}
                 />

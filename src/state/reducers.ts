@@ -6,6 +6,8 @@ import { SearchViewStates, MangaInfoViewStates, ReadViewStates, APIStates } from
 import ManhuaguiAPI from 'src/sources/Manhuagui';
 import ManhuaduiAPI from 'src/sources/Manhuadui';
 import AsyncStorage from '@react-native-community/async-storage';
+import LocalMangaAPI from 'src/sources/Local';
+import autoMergeLevel2 from 'redux-persist/es/stateReconciler/autoMergeLevel2';
 
 function SearchViewReducer(state: SearchViewStates | undefined, actions: Actions) {
     if (!state)
@@ -101,11 +103,13 @@ function APIReducer(state: APIStates | undefined, actions: Actions) {
     if (!state) {
         let manhuagui = new ManhuaguiAPI
         let manhuadui = new ManhuaduiAPI
+        let local = new LocalMangaAPI
 
         state = {
             interfaces: {
                 manhuagui: manhuagui,
                 manhuadui: manhuadui,
+                local: local
             },
             storages: {
                 manhuagui: {
@@ -113,6 +117,10 @@ function APIReducer(state: APIStates | undefined, actions: Actions) {
                     histories: {}
                 },
                 manhuadui: {
+                    favorites: [],
+                    histories: {}
+                },
+                local: {
                     favorites: [],
                     histories: {}
                 }
@@ -173,7 +181,6 @@ function NavigationReducer(state: any, action: Actions) {
         return null
     switch (action.type) {
         case "navigation_setstate":
-            console.log('from action:', action.state)
             return action.state
     }
     return state
@@ -182,6 +189,7 @@ function NavigationReducer(state: any, action: Actions) {
 const APIPersistConfig = {
     key: 'akigumov2_api',
     storage: AsyncStorage,
+    stateReconciler: autoMergeLevel2,
     blacklist: ['interfaces']
 }
 
