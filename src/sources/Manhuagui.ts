@@ -181,6 +181,20 @@ class ManhuaguiSearchResultFeeder implements SearchResultFeeder {
 export default class ManhuaguiAPI implements MangaAPI {
     name: string = "manhuagui"
 
+    getFavorite(entries: MangaMeta[]) {
+        return entries
+    }
+
+    addFavorite(entries: MangaMeta[], entry: MangaMeta) {
+        if (entries.find(item => item.id == entry.id))
+            return entries
+        return entries.concat([entry])
+    }
+
+    removeFavorite(entries: MangaMeta[], entry: MangaMeta) {
+        return entries.filter(item => item.id != entry.id)
+    }
+
     getManga(meta: MangaMeta, callback: (info: MangaInfo) => void) {
         fetch(`https://www.manhuagui.com/comic/${meta.id}/`, {
             headers: {

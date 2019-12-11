@@ -16,8 +16,7 @@ const mapState = (state: MainStates) => ({
 })
 
 const mapDispatch = {
-    dispatchAddFavorite: (meta: MangaMeta): Actions => ({ type: "api_storage_addfavorite", meta: meta }),
-    dispatchRemoveFavorite: (meta: MangaMeta): Actions => ({ type: "api_storage_removefavorite", meta: meta }),
+    dispatchSetFavorite: (entries: MangaMeta[]): Actions => ({ type: "api_storage_setfavorite", entries: entries }),
     dispatchReadViewClear: (): Actions => ({ type: "readview_clear" }),
     dispatchSetPage: (page: number): Actions => ({ type: "readview_setpage", page: page }),
     dispatchFeederReady: (feeder: ChapterFeeder): Actions => ({ type: "readview_feederready", feeder: feeder }),
@@ -80,10 +79,10 @@ function MangaInfoView(props: MangaInfoViewProps) {
 
                 let onPressFavorite
                 if (hasFavorite)
-                    onPressFavorite = () => props.dispatchRemoveFavorite((props.info && props.info.meta) as MangaMeta)
+                    onPressFavorite = () => props.dispatchSetFavorite(props.api.removeFavorite(props.favorites, (props.info && props.info.meta) as MangaMeta))
 
                 else
-                    onPressFavorite = () => props.dispatchAddFavorite((props.info && props.info.meta) as MangaMeta)
+                    onPressFavorite = () => props.dispatchSetFavorite(props.api.addFavorite(props.favorites, (props.info && props.info.meta) as MangaMeta))
 
                 return (
                     <ScrollView>

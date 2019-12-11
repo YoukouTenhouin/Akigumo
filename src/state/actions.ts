@@ -93,16 +93,11 @@ interface APISetCurrent {
     current: string
 }
 
-type APIStorageActions = APIStorageAddFavorite | APIStorageRemoveFavorite | APIStorageSetHistory
+type APIStorageActions = APIStorageSetFavorite | APIStorageSetHistory
 
-interface APIStorageAddFavorite {
-    type: "api_storage_addfavorite"
-    meta: MangaMeta
-}
-
-interface APIStorageRemoveFavorite {
-    type: "api_storage_removefavorite"
-    meta: MangaMeta
+interface APIStorageSetFavorite {
+    type: "api_storage_setfavorite"
+    entries: MangaMeta[]
 }
 
 interface APIStorageSetHistory {

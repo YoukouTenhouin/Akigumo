@@ -206,6 +206,20 @@ class ManhuaduiSearchResultFeeder implements SearchResultFeeder {
 export default class ManhuaduiAPI implements MangaAPI {
     name: string = "manhuadui"
 
+    getFavorite(entries: MangaMeta[]) {
+        return entries
+    }
+
+    addFavorite(entries: MangaMeta[], entry: MangaMeta) {
+        if (entries.find(item => item.id == entry.id))
+            return entries
+        return entries.concat([entry])
+    }
+
+    removeFavorite(entries: MangaMeta[], entry: MangaMeta) {
+        return entries.filter(item => item.id != entry.id)
+    }
+
     getManga(meta: MangaMeta, callback: (info: MangaInfo) => void) {
         let mangaUrl = `https://www.manhuadui.com/manhua/${meta.id}/`
 

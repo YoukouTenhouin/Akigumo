@@ -79,6 +79,15 @@ export interface MangaAPI {
     /** an internal string used to identifier source */
     name: string
 
+    /** Interfaces reserved for favorites / histories syncs */
+    /** accept currently stored favorites, return new favorites */
+    getFavorite(current: MangaMeta[]): MangaMeta[]
+    /** accept currently stored favorites and a new favorite entry, return new favorites */
+    addFavorite(current: MangaMeta[], entry: MangaMeta): MangaMeta[]
+    /** accept currently stored favorites and an entry to be removed, return new favorites */
+    removeFavorite(curent: MangaMeta[], entry: MangaMeta): MangaMeta[]
+
+    /* TODO: we probably should let those interfaces return a Promise */
     /** Get [[MangaInfo]] from a [[MangaMeta]] */
     getManga(meta: MangaMeta, callback: (info: MangaInfo) => void): void
     /** Get [[SearchResultFeeder]] from a query string */

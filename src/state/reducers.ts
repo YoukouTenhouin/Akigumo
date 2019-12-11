@@ -117,25 +117,14 @@ function APIReducer(state: APIStates | undefined, actions: Actions) {
             current: "manhuagui",
         }
 
+    let currentStorage
     switch (actions.type) {
         case "api_setcurrent":
             return {
                 ...state,
                 current: actions.current
             }
-        case "api_storage_addfavorite":
-            state = {
-                ...state,
-                storages: {
-                    ...state.storages
-                }
-            }
-            let currentStorage = state.storages[state.current]
-            if (currentStorage.favorites.find(item => item.id == actions.meta.id) != undefined)
-                return state
-            currentStorage.favorites = currentStorage.favorites.concat([actions.meta])
-            return state
-        case "api_storage_removefavorite":
+        case "api_storage_setfavorite":
             state = {
                 ...state,
                 storages: {
@@ -143,7 +132,7 @@ function APIReducer(state: APIStates | undefined, actions: Actions) {
                 }
             }
             currentStorage = state.storages[state.current]
-            currentStorage.favorites = currentStorage.favorites.filter(item => item.id != actions.meta.id)
+            currentStorage.favorites = actions.entries
             return state
         case "api_storage_sethistory":
             state = {
@@ -181,7 +170,7 @@ function NavigationReducer(state: any, action: Actions) {
     switch (action.type) {
         case "navigation_setstate":
             console.log('from action:', action.state)
-            return action.state 
+            return action.state
     }
     return state
 }
