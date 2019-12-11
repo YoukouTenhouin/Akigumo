@@ -29,7 +29,6 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           packages.add(new FullScreenPackage());
           packages.add(new BatteryStatusPackage());
-          packages.add(new RNFSPackage());
           return packages;
         }
 

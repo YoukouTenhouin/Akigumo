@@ -56,12 +56,12 @@ export interface MangaInfo {
  * Feed chapter info into callback
  */
 export interface ChapterFeeder {
-    /** @param callback Callback to receive `chapterInfo` (if there is any), or `undefined` (if there is no previous chapter) */
-    prev(callback: (chapterInfo?: ChapterInfo) => void): void
-    /** @param callback Callback to receive `chapterInfo` (if there is any), or `undefined` (if there is no next chapter) */
-    next(callback: (chapterInfo?: ChapterInfo) => void): void
-    /** @param callback Callback to receive `chatperInfo` */
-    current(callback: (chapterInfo?: ChapterInfo) => void): void
+    /** @param callback Callback to receive [[ChapterInfo]] (if there is any), or `null` (if there is no previous chapter) */
+    prev(): Promise<ChapterInfo | null>
+    /** @param callback Callback to receive [[ChapterInfo]] (if there is any), or `null` (if there is no next chapter) */
+    next(): Promise<ChapterInfo | null>
+    /** @param callback Callback to receive [[ChapterInfo]] */
+    current(): Promise<ChapterInfo>
 }
 
 /**
@@ -69,7 +69,7 @@ export interface ChapterFeeder {
  */
 export interface SearchResultFeeder {
     /** @param callback Callback to receive search results ([] means no more results) */
-    more(callback: (result: MangaMeta[]) => void): void
+    more(): Promise<MangaMeta[]>
 }
 
 /**
@@ -87,11 +87,10 @@ export interface MangaAPI {
     /** accept currently stored favorites and an entry to be removed, return new favorites */
     removeFavorite(curent: MangaMeta[], entry: MangaMeta): Promise<MangaMeta[]>
 
-    /* TODO: we probably should let those interfaces return a Promise */
     /** Get [[MangaInfo]] from a [[MangaMeta]] */
-    getManga(meta: MangaMeta, callback: (info: MangaInfo) => void): void
+    getManga(meta: MangaMeta): Promise<MangaInfo>
     /** Get [[SearchResultFeeder]] from a query string */
-    search(str: string, callback: (feeder: SearchResultFeeder) => void): void
+    search(str: string): Promise<SearchResultFeeder>
     /** Get [[ChapterFeeder]] from a [[ChapterMeta]] */
-    getChapterFeeder(chapter: ChapterMeta, callback: (feeder: ChapterFeeder) => void): void
+    getChapterFeeder(chapter: ChapterMeta): Promise<ChapterFeeder>
 }

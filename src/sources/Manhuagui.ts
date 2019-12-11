@@ -80,66 +80,63 @@ class ManhuaguiChapterFeeder implements ChapterFeeder {
 
     constructor(private mangaNo: string, private currentChapter: string) { }
 
-    fetchChapterInfo(mangaNo: string, chapterNo: string, callback: (data: ChapterData) => void) {
+    async fetchChapterInfo(mangaNo: string, chapterNo: string) {
         console.info(`fetching https://www.manhuagui.com/comic/${mangaNo}/${chapterNo}.html`)
-        fetch(`https://www.manhuagui.com/comic/${mangaNo}/${chapterNo}.html`, { headers: { 'User-Agent': userAgent } })
-            .then((res) => res.text().then(
-                (text) => {
-                    let jsonStr: string = constructChapterInfo(text)
-                    let jsonData = JSON.parse(jsonStr.substr(12, jsonStr.length - 24))
+        let res = await fetch(`https://www.manhuagui.com/comic/${mangaNo}/${chapterNo}.html`, { headers: { 'User-Agent': userAgent } })
+        let text = await res.text()
+        let jsonStr: string = constructChapterInfo(text)
+        let jsonData = JSON.parse(jsonStr.substr(12, jsonStr.length - 24))
 
-                    console.log(jsonData)
+        console.log(jsonData)
 
-                    let nextId: number = jsonData['nextId']
-                    let prevId: number = jsonData['prevId']
+        let nextId: number = jsonData['nextId']
+        let prevId: number = jsonData['prevId']
 
-                    let md5: string = jsonData['sl']['md5']
-                    let path: string = jsonData['path']
-                    let files: string[] = jsonData['files']
-                    let mangaName: string = jsonData['bname']
-                    let chapterName: string = jsonData['cname']
+        let md5: string = jsonData['sl']['md5']
+        let path: string = jsonData['path']
+        let files: string[] = jsonData['files']
+        let mangaName: string = jsonData['bname']
+        let chapterName: string = jsonData['cname']
 
-                    this.nextChapter = nextId == 0 ? undefined : nextId.toString()
-                    this.prevChapter = prevId == 0 ? undefined : prevId.toString()
+        this.nextChapter = nextId == 0 ? undefined : nextId.toString()
+        this.prevChapter = prevId == 0 ? undefined : prevId.toString()
 
-                    callback({ md5: md5, path: path, files: files, mangaName: mangaName, chapterName: chapterName })
-                }))
+        return { md5: md5, path: path, files: files, mangaName: mangaName, chapterName: chapterName }
     }
 
-    current(callback: (chapterInfo?: ChapterInfo) => void) {
+    async current() {
         this.prevChapter = undefined
         this.nextChapter = undefined
 
-        this.fetchChapterInfo(this.mangaNo, this.currentChapter, (data) => {
-            let pageInfos: PageInfo[] = data.files.map((file) => {
-                return {
-                    source: {
-                        uri: `https://i.hamreus.com${data.path}${file}?cid=${this.currentChapter}&md5=${data.md5}`,
-                        headers: {
-                            'Referer': `https://www.manhuagui.com/comic/${this.mangaNo}/${this.currentChapter}`,
-                            'User-Agent': userAgent
-                        }
+        let data = await this.fetchChapterInfo(this.mangaNo, this.currentChapter)
+        let pageInfos: PageInfo[] = data.files.map((file) => {
+            return {
+                source: {
+                    uri: `https://i.hamreus.com${data.path}${file}?cid=${this.currentChapter}&md5=${data.md5}`,
+                    headers: {
+                        'Referer': `https://www.manhuagui.com/comic/${this.mangaNo}/${this.currentChapter}`,
+                        'User-Agent': userAgent
                     }
                 }
-            })
-            callback({
-                meta: { title: data.chapterName, chapterNo: this.currentChapter, mangaNo: this.mangaNo },
-                pages: pageInfos
-            })
+            }
         })
+        return {
+            meta: { title: data.chapterName, chapterNo: this.currentChapter, mangaNo: this.mangaNo },
+            pages: pageInfos
+        }
     }
 
-    prev(callback: (chapterInfo?: ChapterInfo) => void) {
+    async prev() {
         console.log(this.prevChapter)
-        if (!this.prevChapter) return callback()
+        if (!this.prevChapter) return null
         this.currentChapter = this.prevChapter
-        this.current(callback)
+        return this.current()
     }
 
-    next(callback: (chapterInfo?: ChapterInfo) => void) {
-        if (!this.nextChapter) return callback()
+    async next() {
+        if (!this.nextChapter) return null
         this.currentChapter = this.nextChapter
-        this.current(callback)
+        return this.current()
     }
 }
 
@@ -152,29 +149,30 @@ class ManhuaguiSearchResultFeeder implements SearchResultFeeder {
         this.totalResults = 0
     }
 
-    fetch(page: number, callback: (result?: searchParseResult) => void) {
+    async fetch(page: number) {
         if (this.totalResults != 0 && (page - 1) * 10 > this.totalResults)
-            return callback()
+            return new Promise<null>(resolve => resolve(null))
 
-        fetch(`https://www.manhuagui.com/s/${this.queryStr}_p${page}.html`, {
+        let res = await fetch(`https://www.manhuagui.com/s/${this.queryStr}_p${page}.html`, {
             headers: {
                 'User-Agent': userAgent
             }
-        }).then(res => res.text().then(html => callback(parseSearchHTML(html))))
+        })
+        let text = await res.text()
+        return parseSearchHTML(text)
     }
 
-    more(callback: (result: MangaMeta[]) => void) {
+    async more() {
         if (this.currentPage != 0 && this.currentPage * 10 > this.totalResults)
-            return callback([])
+            return []
 
         this.currentPage += 1
-        this.fetch(this.currentPage, result => {
-            if (!result)
-                return callback([])
+        let result = await this.fetch(this.currentPage)
+        if (!result)
+            return []
 
-            this.totalResults = result.totalCount
-            callback(result.results)
-        })
+        this.totalResults = result.totalCount
+        return result.results
     }
 }
 
@@ -195,19 +193,22 @@ export default class ManhuaguiAPI implements MangaAPI {
         return new Promise<MangaMeta[]>(resolve => resolve(entries.filter(item => item.id != entry.id)))
     }
 
-    getManga(meta: MangaMeta, callback: (info: MangaInfo) => void) {
-        fetch(`https://www.manhuagui.com/comic/${meta.id}/`, {
+    async getManga(meta: MangaMeta) {
+        let res = await fetch(`https://www.manhuagui.com/comic/${meta.id}/`, {
             headers: {
                 'User-Agent': userAgent
             }
-        }).then((res) => res.text().then((text) => (callback(parseMangaHTML(meta.id, text)))))
+        })
+
+        let text = await res.text()
+        return parseMangaHTML(meta.id, text)
     }
 
-    search(str: string, callback: (feeder: SearchResultFeeder) => void) {
-        callback(new ManhuaguiSearchResultFeeder(str))
+    async search(str: string) {
+        return new ManhuaguiSearchResultFeeder(str)
     }
 
-    getChapterFeeder(chapter: ChapterMeta, callback: (feeder: ChapterFeeder) => void) {
-        callback(new ManhuaguiChapterFeeder(chapter.mangaNo, chapter.chapterNo))
+    async getChapterFeeder(chapter: ChapterMeta) {
+        return new ManhuaguiChapterFeeder(chapter.mangaNo, chapter.chapterNo)
     }
 }

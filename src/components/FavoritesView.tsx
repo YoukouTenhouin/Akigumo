@@ -81,9 +81,9 @@ function FavoritesView(props: FavoritesViewProps) {
                         return (<MangaInfoCard
                             coverSource={item.coverSource}
                             title={item.title}
-                            onPress={() => {
+                            onPress={async () => {
                                 props.dispatchMangaInfoClear()
-                                props.api.getManga(item, props.dispatchMangaInfoSetInfo)
+                                props.dispatchMangaInfoSetInfo(await props.api.getManga(item))
                                 props.toMangaInfoView()
                             }}
                         />)
