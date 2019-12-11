@@ -98,11 +98,14 @@ function ReadViewReducer(state: ReadViewStates | undefined, actions: Actions) {
 }
 
 function APIReducer(state: APIStates | undefined, actions: Actions) {
-    if (!state)
+    if (!state) {
+        let manhuagui = new ManhuaguiAPI
+        let manhuadui = new ManhuaduiAPI
+
         state = {
             interfaces: {
-                manhuagui: new ManhuaguiAPI,
-                manhuadui: new ManhuaduiAPI
+                manhuagui: manhuagui,
+                manhuadui: manhuadui,
             },
             storages: {
                 manhuagui: {
@@ -116,6 +119,7 @@ function APIReducer(state: APIStates | undefined, actions: Actions) {
             },
             current: "manhuagui",
         }
+    }
 
     let currentStorage
     switch (actions.type) {

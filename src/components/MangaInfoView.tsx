@@ -69,7 +69,7 @@ function MangaInfoView(props: MangaInfoViewProps) {
             {theme => {
                 if (!props.info)
                     return null
-                    
+
                 console.log(props.info.meta)
 
                 let hasHistory = !!props.histories[props.info.meta.id]
@@ -79,10 +79,12 @@ function MangaInfoView(props: MangaInfoViewProps) {
 
                 let onPressFavorite
                 if (hasFavorite)
-                    onPressFavorite = () => props.dispatchSetFavorite(props.api.removeFavorite(props.favorites, (props.info && props.info.meta) as MangaMeta))
+                    onPressFavorite = async () => props.dispatchSetFavorite(await props.api.removeFavorite(props.favorites,
+                        (props.info && props.info.meta) as MangaMeta))
 
                 else
-                    onPressFavorite = () => props.dispatchSetFavorite(props.api.addFavorite(props.favorites, (props.info && props.info.meta) as MangaMeta))
+                    onPressFavorite = async () => props.dispatchSetFavorite(await props.api.addFavorite(props.favorites,
+                        (props.info && props.info.meta) as MangaMeta))
 
                 return (
                     <ScrollView>

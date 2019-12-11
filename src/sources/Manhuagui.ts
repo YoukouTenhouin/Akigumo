@@ -182,17 +182,17 @@ export default class ManhuaguiAPI implements MangaAPI {
     name: string = "manhuagui"
 
     getFavorite(entries: MangaMeta[]) {
-        return entries
+        return new Promise<MangaMeta[]>(resolve => resolve(entries))
     }
 
     addFavorite(entries: MangaMeta[], entry: MangaMeta) {
         if (entries.find(item => item.id == entry.id))
-            return entries
-        return entries.concat([entry])
+            return new Promise<MangaMeta[]>(resolve => resolve(entries))
+        return new Promise<MangaMeta[]>(resolve => resolve(entries.concat([entry])))
     }
 
     removeFavorite(entries: MangaMeta[], entry: MangaMeta) {
-        return entries.filter(item => item.id != entry.id)
+        return new Promise<MangaMeta[]>(resolve => resolve(entries.filter(item => item.id != entry.id)))
     }
 
     getManga(meta: MangaMeta, callback: (info: MangaInfo) => void) {

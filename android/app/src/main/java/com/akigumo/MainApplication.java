@@ -10,6 +10,8 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import com.rnfs.RNFSPackage;
+
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -27,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
           packages.add(new FullScreenPackage());
           packages.add(new BatteryStatusPackage());
+          packages.add(new RNFSPackage());
           return packages;
         }
 
