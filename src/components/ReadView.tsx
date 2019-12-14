@@ -426,6 +426,14 @@ function ReadView(inputProps: ReadViewProps) {
                 initialPage={props.pageIndex}
                 animateDuration={300}
                 lastPage={props.chapter.pages.length - 1}
+                renderOverlay={() => (
+                    <TouchResponder
+                        overlayVisible={props.overlayVisible}
+                        leftHand={props.leftHand}
+                        onToggleOverlay={props.dispatchToggleOverlay}
+                        onPressNext={() => viewPager.current && viewPager.current.next()}
+                        onPressPrev={() => viewPager.current && viewPager.current.prev()} />
+                )}
                 renderPage={index => (
                     <View style={{ flex: 1 }}>
                         <ProgressImage
@@ -434,23 +442,8 @@ function ReadView(inputProps: ReadViewProps) {
                             style={{ width: '100%', height: '100%' }}
                             source={props.chapter.pages[index].source} />
 
-                        {!props.overlayVisible && !props.doublePage ? <TouchResponder
-                            overlayVisible={props.overlayVisible}
-                            leftHand={props.leftHand}
-                            onToggleOverlay={props.dispatchToggleOverlay}
-                            onPressNext={() => viewPager.current && viewPager.current.next()}
-                            onPressPrev={() => viewPager.current && viewPager.current.prev()} /> : null}
                     </View>
                 )} />
-
-            {props.overlayVisible || props.doublePage ? (
-                <TouchResponder
-                    overlayVisible={props.overlayVisible}
-                    leftHand={props.leftHand}
-                    onPressNext={() => viewPager.current && viewPager.current.next()}
-                    onPressPrev={() => viewPager.current && viewPager.current.prev()}
-                    onToggleOverlay={props.dispatchToggleOverlay} />
-            ) : null}
 
             {props.overlayVisible ? (
                 <OverlayControls

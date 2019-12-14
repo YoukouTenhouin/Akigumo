@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, StyleSheet, Animated } from 'react-native'
+import { Text, View, StyleSheet, Animated, PanResponder, PanResponderInstance, EventSubscriptionVendor } from 'react-native'
 
 interface ViewPagerDynamicProps {
     onPrevThanFirst?: () => void
@@ -7,6 +7,7 @@ interface ViewPagerDynamicProps {
     onPrev?: () => void
     onNext?: () => void
     renderPage: (index: number) => any
+    renderOverlay?: () => any
     pagesOnScreen: number
     animateDuration: number
     initialPage?: number
@@ -16,16 +17,39 @@ interface ViewPagerDynamicProps {
 }
 
 interface ViewPagerDynamicStates {
-    offset: Animated.Value
+    translateX: Animated.Value
     page: number
     width?: number
     height?: number
 }
 
 export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicProps, ViewPagerDynamicStates> {
+    _panResponder: PanResponderInstance
     constructor(props: ViewPagerDynamicProps) {
         super(props)
-        this.state = { offset: new Animated.Value(0), page: this.props.initialPage || 0 }
+        this._panResponder = PanResponder.create({
+            onMoveShouldSetPanResponder: (_evt, gestureState) => (
+                Math.abs(gestureState.dx) > 30
+            ),
+            onPanResponderMove: (_evt, gestureState) => this.state.translateX.setValue(gestureState.dx),
+            onPanResponderRelease: (_evt, gestureState) => {
+                if (!this.state.width)
+                    return this.state.translateX.setValue(0)
+
+                if (Math.abs(gestureState.vx) >= 0.5)
+                    return gestureState.vx >= 0 ? this.next() : this.prev()
+
+                if (Math.abs(gestureState.dx) >= this.state.width / 4)
+                    return gestureState.dx >= 0 ? this.next() : this.prev()
+
+                this.animateX({
+                    toValue: 0,
+                    duration: this.props.animateDuration / 2,
+                    useNativeDriver: true
+                })
+            }
+        })
+        this.state = { translateX: new Animated.Value(0), page: this.props.initialPage || 0 }
     }
 
     shouldComponentUpdate(nextProps: ViewPagerDynamicProps, nextState: ViewPagerDynamicStates) {
@@ -51,38 +75,42 @@ export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicPr
         return false
     }
 
-    private async animateOffset(config: Animated.TimingAnimationConfig) {
+    private async animateX(config: Animated.TimingAnimationConfig) {
         return new Promise<void>(resolve => {
-            Animated.timing(this.state.offset, config)
+            Animated.timing(this.state.translateX, config)
                 .start(() => resolve())
         })
     }
 
     async prev(animated = true) {
-        if (this.state.page == 0)
+        if (this.state.page == 0) {
+            this.state.translateX.setValue(0)
             return this.props.onPrevThanFirst && this.props.onPrevThanFirst()
+        }
         if (animated && this.state.width)
-            await this.animateOffset({
-                toValue: -1,
+            await this.animateX({
+                toValue: -this.state.width,
                 duration: this.props.animateDuration,
                 useNativeDriver: true
             })
         this.setState({ page: this.state.page - 1 })
-        this.state.offset.setValue(0)
+        this.state.translateX.setValue(0)
         this.props.onPrev && this.props.onPrev()
     }
 
     async next(animated = true) {
-        if (this.state.page == this.props.lastPage)
+        if (this.state.page == this.props.lastPage) {
+            this.state.translateX.setValue(0)
             return this.props.onNextThanLast && this.props.onNextThanLast()
+        }
         if (animated && this.state.width)
-            await this.animateOffset({
-                toValue: 1,
+            await this.animateX({
+                toValue: this.state.width,
                 duration: this.props.animateDuration,
                 useNativeDriver: true
             })
         this.setState({ page: this.state.page + 1 })
-        this.state.offset.setValue(0)
+        this.state.translateX.setValue(0)
         this.props.onNext && this.props.onNext()
     }
 
@@ -122,6 +150,7 @@ export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicPr
                 ...this.props.style
             },
             container: {
+                position: "absolute",
                 height: "100%",
                 flexDirection: "row-reverse",
                 width: pageWidth * pagesToRender
@@ -150,6 +179,7 @@ export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicPr
 
         return (
             <View
+                {...this._panResponder.panHandlers}
                 style={styles.wrapper}
                 onLayout={onLayout} >
 
@@ -158,8 +188,8 @@ export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicPr
                         ...styles.container,
                         transform: [
                             {
-                                translateX: this.state.offset.interpolate({
-                                    inputRange: [-1, 1],
+                                translateX: this.state.translateX.interpolate({
+                                    inputRange: [-this.state.width, this.state.width],
                                     outputRange: [-pageWidth * 2, 0],
                                     extrapolate: "clamp"
                                 })
@@ -168,6 +198,8 @@ export default class ViewPagerDynamic extends React.Component<ViewPagerDynamicPr
                     }}>
                     {pages}
                 </Animated.View>
+
+                {this.props.renderOverlay && this.props.renderOverlay()}
 
             </ View >
         )
