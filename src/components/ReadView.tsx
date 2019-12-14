@@ -15,6 +15,7 @@ import Actions from 'src/state/actions'
 import FullScreen from 'src/FullScreen'
 import BatteryStatus from 'src/BatteryStatus'
 import { ThemeContext } from 'src/Theme'
+import ViewPagerDynamic from './ViewPagerDynamic'
 
 const ProgressImage = createImageProgress(FastImage)
 
@@ -262,6 +263,27 @@ const connector = connect(
 type PropsFromRedux = ConnectedProps<typeof connector>
 type ReadViewProps = PropsFromRedux
 
+function ReadViewUpdateCompare(prev: ReadViewProps, next: ReadViewProps) {
+    // skip pageIndex compare
+    let prevSignificant = {
+        ...prev,
+        pageIndex: undefined,
+    }
+
+    let nextSignificant = {
+        ...next,
+        pageIndex: undefined,
+    }
+
+    type PropKeys = keyof (typeof prevSignificant);
+
+    for (const key in prevSignificant) {
+        if (prevSignificant[key as PropKeys] !== nextSignificant[key as PropKeys])
+            return false
+    }
+    return true
+}
+
 function InfoDisplay(props: { text: String }) {
     const styles = StyleSheet.create({
         text: {
@@ -350,13 +372,7 @@ function ReadView(inputProps: ReadViewProps) {
         return props.chapter.pages[idx]
     }
 
-    let prev = pageByOff(-1)
-    let current = pageByOff(0) as PageInfo
-    let next = pageByOff(1)
-    let nextNext = pageByOff(2)
-    let nextNextNext = pageByOff(3)
-
-    const viewPager = React.useRef<ViewPager>(null)
+    const viewPager = React.useRef<ViewPagerDynamic>(null)
 
     const onNextChapter = () => {
         props.feeder.next().then(chapter => {
@@ -365,7 +381,6 @@ function ReadView(inputProps: ReadViewProps) {
                 props.dispatchHistory(chapter.meta, 0)
                 props.dispatchChapterReady(chapter)
             }
-            viewPager.current && viewPager.current.setPage(2)
         })
     }
 
@@ -376,7 +391,6 @@ function ReadView(inputProps: ReadViewProps) {
                 props.dispatchChapterReady(chapter)
                 props.dispatchSetPage(chapter.pages.length - 1)
             }
-            viewPager.current && viewPager.current.setPage(2)
         })
     }
 
@@ -387,116 +401,13 @@ function ReadView(inputProps: ReadViewProps) {
                 props.dispatchChapterReady(chapter)
                 props.dispatchSetPage(0)
             }
-            viewPager.current && viewPager.current.setPage(2)
         })
-    }
-
-    const onNextPage = () => {
-        if (props.pageIndex + 1 >= props.chapter.pages.length)
-            return onNextChapter()
-        props.dispatchSetPage(props.pageIndex + 1)
-        props.dispatchHistory(props.chapter.meta, props.pageIndex + 1)
-    }
-
-    const onPrevPage = () => {
-        if (props.pageIndex - 1 < 0)
-            return onPrevChapter()
-        props.dispatchSetPage(props.pageIndex - 1)
-        props.dispatchHistory(props.chapter.meta, props.pageIndex - 1)
-    }
-
-    const onPageSelected = (page: number) => {
-        console.log(`page selected: ${page}`)
-        if (page == 3)
-            onPrevPage()
-        else if (page == 1)
-            onNextPage()
-        else if (page == 0)
-            viewPager.current && viewPager.current.setPageWithoutAnimation(2)
     }
 
     FullScreen.set(true, props.overlayVisible)
     React.useEffect(() => (() => FullScreen.disable()), [])
 
-    const SinglePageView = () => (
-        <ViewPager
-            ref={viewPager}
-            style={{ flex: 1 }}
-            initialPage={2}
-            onPageSelected={e => onPageSelected(e.nativeEvent.position)}
-            scrollEnabled={!props.overlayVisible}>
-
-            <View key={nextNext ? nextNext.source.uri : "prev"}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={nextNext && nextNext.source} />
-            </View>
-
-            <View key={next ? next.source.uri : "next"}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={next && next.source} />
-            </View>
-
-            <View key={current.source.uri}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={{
-                        ...current.source,
-                        priority: FastImage.priority.high
-                    }} />
-                {!props.overlayVisible ? (
-                    <TouchResponder
-                        overlayVisible={props.overlayVisible}
-                        leftHand={props.leftHand}
-                        onPressNext={() => viewPager.current && viewPager.current.setPage(1)}
-                        onPressPrev={() => viewPager.current && viewPager.current.setPage(3)}
-                        onToggleOverlay={props.dispatchToggleOverlay} />
-                ) : null}
-            </View>
-
-            <View key={prev ? prev.source.uri : "prev"}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={prev && prev.source} />
-            </View>
-        </ViewPager>
-    )
-
-    const DoublePageView = () => (
-        <View style={{ flex: 1, flexDirection: "row" }}>
-            <View style={{ flex: 1 }}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={next && next.source} />
-            </View>
-
-            <View style={{ flex: 1 }}>
-                <ProgressImage
-                    resizeMode="contain"
-                    indicator={Progress.Pie}
-                    style={{ width: '100%', height: '100%' }}
-                    source={current.source} />
-            </View>
-
-            {/* Preload prev and nextNext */}
-            <View style={{ width: 0, height: 0 }}>
-                <ProgressImage source={prev && prev.source} />
-                <ProgressImage source={nextNext && nextNext.source} />
-                <ProgressImage source={nextNextNext && nextNextNext.source} />
-            </View>
-        </View>
-    )
+    console.log(props)
 
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
@@ -505,14 +416,39 @@ function ReadView(inputProps: ReadViewProps) {
             <InfoDisplay text={`${props.pageIndex + 1}/${props.chapter.pages.length} ${props.chapter.meta.title}`} />
             <TextClock format="hh:mm A" interval={1000} />
 
-            {props.doublePage ? (<DoublePageView />) : (<SinglePageView />)}
+            <ViewPagerDynamic
+                ref={viewPager}
+                onNext={() => props.dispatchSetPage(props.pageIndex + 1)}
+                onPrev={() => props.dispatchSetPage(props.pageIndex - 1)}
+                onPrevThanFirst={onPrevChapter}
+                onNextThanLast={onNextChapter}
+                pagesOnScreen={props.doublePage ? 2 : 1}
+                initialPage={props.pageIndex}
+                animateDuration={300}
+                lastPage={props.chapter.pages.length - 1}
+                renderPage={index => (
+                    <View style={{ flex: 1 }}>
+                        <ProgressImage
+                            resizeMode="contain"
+                            indicator={Progress.Pie}
+                            style={{ width: '100%', height: '100%' }}
+                            source={props.chapter.pages[index].source} />
+
+                        {!props.overlayVisible && !props.doublePage ? <TouchResponder
+                            overlayVisible={props.overlayVisible}
+                            leftHand={props.leftHand}
+                            onToggleOverlay={props.dispatchToggleOverlay}
+                            onPressNext={() => viewPager.current && viewPager.current.next()}
+                            onPressPrev={() => viewPager.current && viewPager.current.prev()} /> : null}
+                    </View>
+                )} />
 
             {props.overlayVisible || props.doublePage ? (
                 <TouchResponder
                     overlayVisible={props.overlayVisible}
                     leftHand={props.leftHand}
-                    onPressNext={onNextPage}
-                    onPressPrev={onPrevPage}
+                    onPressNext={() => viewPager.current && viewPager.current.next()}
+                    onPressPrev={() => viewPager.current && viewPager.current.prev()}
                     onToggleOverlay={props.dispatchToggleOverlay} />
             ) : null}
 

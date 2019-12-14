@@ -91,8 +91,8 @@ function FavoritesView(props: FavoritesViewProps) {
                             title={item.title}
                             onPress={async () => {
                                 props.dispatchMangaInfoClear()
-                                props.dispatchMangaInfoSetInfo(await props.api.getManga(item))
                                 props.toMangaInfoView()
+                                props.dispatchMangaInfoSetInfo(await props.api.getManga(item))
                             }}
                         />)
                     }}

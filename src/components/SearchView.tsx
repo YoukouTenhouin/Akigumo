@@ -71,8 +71,8 @@ function SearchView(props: SearchViewProps) {
                                         title={item.item.title}
                                         onPress={() => {
                                             props.dispatchMangaInfoClear()
-                                            props.api.getManga(item.item).then(props.dispatchMangaInfoSet)
                                             props.toMangaInfoView()
+                                            props.api.getManga(item.item).then(props.dispatchMangaInfoSet)
                                         }}
                                     />}
                                 keyExtractor={item => item.id}
